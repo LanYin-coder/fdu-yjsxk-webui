@@ -2,7 +2,16 @@
 
 支持 Windows 10 / 11 x64，不需要管理员权限。
 
-## 一键启动包（当前可用）
+## 预编译桌面版（推荐）
+
+1. 从 [GitHub Releases](https://github.com/LanYin-coder/fdu-yjsxk-webui/releases/latest) 下载 `FDUCourseHelper-Windows-x64.zip`。
+2. 完整解压，打开 `FDUCourseHelper` 文件夹。
+3. 双击 `FDUCourseHelper.exe`，按“登录 → 选课 → 自检 → 运行”操作。
+
+不需要安装 Python，请保留同目录的 `_internal` 文件夹。程序使用 WebView2 显示独立窗口，缺少组件时尝试打开默认浏览器。
+EXE 已通过 Windows 云端构建、48 项单元测试和打包后启动测试（单实例、端口切换、后台任务、中文日志、退出与登录态保存）；尚未手工验证实际 Windows 10 / 11 桌面窗口。
+
+## 源码一键启动包
 
 1. 完整解压 FDUCourseHelper-Windows-x64-bootstrap.zip，不要在压缩包里直接运行。
 2. 双击“启动选课助手.bat”。

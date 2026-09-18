@@ -6,9 +6,9 @@
 
 在 [GitHub Releases](https://github.com/LanYin-coder/fdu-yjsxk-webui/releases/latest) 下载对应系统的附件：
 
-- macOS Apple Silicon：`FDU选课助手-macOS-arm64.dmg`，打开后拖入“应用程序”。
-- Windows 10 / 11 x64：`FDUCourseHelper-Windows-x64-bootstrap.zip`，完整解压后双击“启动选课助手.bat”；首次启动需要联网准备环境。
-- Windows 预编译版通过下方工作流构建，构建通过后会补充到版本附件中。
+- macOS Apple Silicon：`FDUCourseHelper-macOS-arm64.dmg`，打开后拖入“应用程序”。
+- Windows 10 / 11 x64：`FDUCourseHelper-Windows-x64.zip`，完整解压后双击 `FDUCourseHelper.exe`，不需要安装 Python。
+- Windows 源码启动包：`FDUCourseHelper-Windows-x64-bootstrap.zip`，完整解压后双击“启动选课助手.bat”；首次启动需要联网准备环境。
 
 GitHub 自动提供的 `Source code` 压缩包是源码，不是安装包。登录态与个人配置仅保存在本机，不随源码或安装包发布。
 
@@ -30,9 +30,9 @@ GitHub 自动提供的 `Source code` 压缩包是源码，不是安装包。登�
 
 ### macOS 应用（直接点击使用）
 
-Apple Silicon Mac（M1/M2/M3/M4 等，macOS 12.3+）可以直接使用 `dist` 目录中的成品：
+Apple Silicon Mac（M1/M2/M3/M4 等，macOS 12.3+）可以从上面的版本下载页获取成品，或使用本地 `dist` 目录中的构建产物：
 
-1. 打开 `FDU选课助手-macOS-arm64.dmg`。
+1. 打开下载的 `FDUCourseHelper-macOS-arm64.dmg`（本地构建名为 `FDU选课助手-macOS-arm64.dmg`）。
 2. 将“FDU选课助手”拖入镜像内的 `Applications` 文件夹。
 3. 在“应用程序”中双击“FDU选课助手”，打开独立桌面窗口。
 
@@ -64,13 +64,15 @@ Finder 中右键应用并选择“打开”，再确认一次。当前构建仅�
 
 ### Windows 10 / 11（x64）
 
-当前提供 dist/FDUCourseHelper-Windows-x64-bootstrap.zip 一键启动包。完整解压后，双击“启动选课助手.bat”。
-首次运行会联网下载并准备独立 Python 与依赖，不需要预装 Python，也不需要管理员权限。后续直接双击启动即可。
+推荐从版本下载页获取 `FDUCourseHelper-Windows-x64.zip`。完整解压后，双击文件夹中的 `FDUCourseHelper.exe`；请保留同目录的 `_internal` 文件夹，不需要预装 Python 或管理员权限。
+
+也提供 `FDUCourseHelper-Windows-x64-bootstrap.zip` 源码启动包，完整解压后双击“启动选课助手.bat”。
+该启动包首次运行会联网下载并准备独立 Python 与依赖，后续直接双击启动即可。
 数据独立保存在 %LOCALAPPDATA%\\FDUCourseHelper，更新程序不会清除 Cookie 和课程配置。
 
 独立窗口使用 Microsoft Edge WebView2；缺少组件时会尝试使用默认浏览器。
-预编译 EXE 需在 Windows 上运行 scripts/build_windows_app.ps1 构建；也可通过项目的 GitHub Actions 工作流生成。
-Windows 预编译成品需要在 Windows 环境构建与验证；本次提供的一键启动包首次运行会联网准备环境。
+预编译 EXE 已在 GitHub Actions 的 Windows 环境完成构建、48 项单元测试和打包后启动测试；桌面窗口仍需在实际 Windows 10 / 11 设备上验证。
+重新构建可在 Windows 运行 `scripts/build_windows_app.ps1`，或手动运行项目的 GitHub Actions 工作流。
 详见 [Windows 使用与构建说明](docs/Windows.md)。
 
 ### 从源码运行 WebUI
