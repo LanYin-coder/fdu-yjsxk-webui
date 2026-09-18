@@ -1,3 +1,4 @@
+import io
 import json
 import os
 from pathlib import Path
@@ -14,6 +15,27 @@ import webui
 
 
 class PlatformTests(unittest.TestCase):
+    def test_windows_stdio_preserves_chinese_with_non_utf8_locale(self):
+        input_bytes = io.BytesIO("确认\n".encode("utf-8"))
+        output_bytes, error_bytes = io.BytesIO(), io.BytesIO()
+        streams = {
+            "stdin": io.TextIOWrapper(input_bytes, encoding="cp1252"),
+            "stdout": io.TextIOWrapper(output_bytes, encoding="cp1252"),
+            "stderr": io.TextIOWrapper(error_bytes, encoding="cp1252"),
+        }
+        try:
+            with mock.patch.object(desktop.sys, "platform", "win32"), mock.patch.multiple(desktop.sys, **streams):
+                desktop.configure_stdio()
+                received = sys.stdin.readline().strip()
+                print("选课助手已启动", flush=True)
+                print("中文错误提示", file=sys.stderr, flush=True)
+            self.assertEqual(received, "确认")
+            self.assertEqual(output_bytes.getvalue().decode("utf-8").strip(), "选课助手已启动")
+            self.assertEqual(error_bytes.getvalue().decode("utf-8").strip(), "中文错误提示")
+        finally:
+            for stream in streams.values():
+                stream.close()
+
     def test_data_paths_preserve_mac_and_use_windows_local_appdata(self):
         self.assertEqual(desktop.data_directory("/app", True, "darwin", {}, "/user"),
                          Path("/user/Library/Application Support/FDU选课助手"))

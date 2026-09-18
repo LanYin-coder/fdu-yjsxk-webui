@@ -22,6 +22,15 @@ APP_NAME = "FDU选课助手"
 APP_VERSION = "1.2.0"
 
 
+def configure_stdio():
+    # Frozen Python ignores PYTHONIOENCODING. Worker pipes still need UTF-8
+    # regardless of the Windows display language or active console code page.
+    if sys.platform == "win32":
+        for stream in (sys.stdin, sys.stdout, sys.stderr):
+            if hasattr(stream, "reconfigure"):
+                stream.reconfigure(encoding="utf-8", errors="replace")
+
+
 def data_directory(resource_dir, frozen, platform=None, environ=None, home=None):
     platform = platform or sys.platform
     env = os.environ if environ is None else environ

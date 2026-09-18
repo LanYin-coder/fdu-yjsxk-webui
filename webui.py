@@ -24,7 +24,7 @@ from typing import Any
 from flask import Flask, jsonify, render_template, request
 
 from src import grab, preselect
-from desktop import (APP_VERSION, DesktopRuntime, configure_logging, data_directory,
+from desktop import (APP_VERSION, DesktopRuntime, configure_logging, configure_stdio, data_directory,
                      keep_awake, open_directory, process_options, terminate_worker)
 
 
@@ -830,6 +830,7 @@ def _available_port(preferred: int) -> int:
 
 def main() -> int:
     global runtime
+    configure_stdio()
     parser = argparse.ArgumentParser(description="FDU 研究生选课 WebUI")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--open", action="store_true", help="启动后打开浏览器")

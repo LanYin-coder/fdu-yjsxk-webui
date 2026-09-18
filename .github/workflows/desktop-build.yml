@@ -37,5 +37,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: FDUCourseHelper-macOS-arm64
-          path: dist/*.dmg
+          path: |
+            dist/*.dmg
+            dist/*-macOS-arm64.zip
           if-no-files-found: error
