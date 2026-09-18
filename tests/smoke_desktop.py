@@ -39,7 +39,17 @@ def main():
                 return json.load(response)
 
         def start():
-            child = subprocess.Popen(command, env=env, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **options)
+            output_path = Path(directory, "startup.log")
+            with output_path.open("ab") as output:
+                child = subprocess.Popen(command, env=env, cwd=ROOT, stdout=output, stderr=subprocess.STDOUT, **options)
+
+            def startup_failed(message):
+                details = output_path.read_text(encoding="utf-8", errors="replace")
+                app_log = Path(directory, "logs", "app.log")
+                if app_log.exists():
+                    details += "\n" + app_log.read_text(encoding="utf-8", errors="replace")
+                raise AssertionError(f"{message}\n{details}")
+
             deadline = time.monotonic() + 20
             while time.monotonic() < deadline:
                 try:
@@ -49,11 +59,11 @@ def main():
                     return child, info
                 except (OSError, ValueError, KeyError):
                     if child.poll() is not None:
-                        raise AssertionError(f"App exited during startup: {child.returncode}")
+                        startup_failed(f"App exited during startup: {child.returncode}")
                     time.sleep(.1)
             child.kill()
             child.wait()
-            raise AssertionError("Startup timed out")
+            startup_failed("Startup timed out")
 
         child = None
         try:
