@@ -1,0 +1,41 @@
+name: Build desktop apps
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+      - name: Build and test Windows app
+        shell: pwsh
+        run: ./scripts/build_windows_app.ps1 -UseCurrentPython
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FDUCourseHelper-Windows-x64
+          path: dist/FDUCourseHelper-Windows-x64.zip
+          if-no-files-found: error
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: arm64
+      - run: python -m venv .venv
+      - run: ./scripts/build_macos_app.command
+      - name: Test packaged app
+        run: .venv/bin/python tests/smoke_desktop.py --executable "dist/FDU选课助手.app/Contents/MacOS/FDUCourseHelper"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FDUCourseHelper-macOS-arm64
+          path: dist/*.dmg
+          if-no-files-found: error

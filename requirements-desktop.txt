@@ -1,0 +1,9 @@
+-r requirements.txt
+pywebview>=6.2,<7
+# PyObjC 12 dropped Python 3.9. Keep all framework wheels on the same series.
+pyobjc-core>=10,<12; sys_platform == "darwin"
+pyobjc-framework-Cocoa>=10,<12; sys_platform == "darwin"
+pyobjc-framework-Quartz>=10,<12; sys_platform == "darwin"
+pyobjc-framework-WebKit>=10,<12; sys_platform == "darwin"
+pyobjc-framework-security>=10,<12; sys_platform == "darwin"
+pyobjc-framework-UniformTypeIdentifiers>=10,<12; sys_platform == "darwin"

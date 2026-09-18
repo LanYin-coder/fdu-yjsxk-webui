@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 敏感信息 —— 千万别提交
+cookie.txt
+config.local.json
+config.json
+config.json.*
+cookie.txt.*
+.env
+.env.*
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.idea/
+.vscode/
+*.swp
+# 预选课备份的旧 config（含真实课程，不入库）
+config.json.preselect.bak
+config.json.webui.bak
+build/
+dist/
+.venv-build-windows/
+logs/
+instance.json
+instance.lock
+instance.tmp

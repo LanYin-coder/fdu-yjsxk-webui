@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>FDU 选课助手</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
+  <script defer src="{{ url_for('static', filename='vendor/lucide.min.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">FD</div>
+        <div class="brand-copy"><strong>FDU 选课助手</strong><span>研究生选课</span></div>
+      </div>
+      <nav class="nav-tabs" aria-label="主导航">
+        <button class="nav-item is-active" type="button" data-view="dashboard"><i data-lucide="route"></i><span>准备与运行</span></button>
+        <button class="nav-item" type="button" data-view="config"><i data-lucide="list-ordered"></i><span>队列设置</span><span class="nav-dot" id="dirty-dot" hidden></span></button>
+        <button class="nav-item" type="button" data-view="logs"><i data-lucide="terminal-square"></i><span>活动记录</span><span class="nav-badge" id="log-badge" hidden>运行中</span></button>
+      </nav>
+      <div class="sidebar-foot"><span class="connection-dot" id="connection-dot"></span><span id="connection-text">正在连接本地服务</span></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><span class="eyebrow" id="today-label"></span><h1 id="view-title">准备与运行</h1></div>
+        <div class="button-row"><button class="task-pill" id="task-pill" data-state="idle" type="button" aria-label="查看任务状态"><span class="pulse-dot"></span><span id="task-pill-text">当前空闲</span></button><button class="icon-button bordered" id="app-options" type="button" aria-label="应用设置" title="应用设置" hidden><i data-lucide="ellipsis"></i></button></div>
+      </header>
+
+      <section class="view is-active" id="view-dashboard" aria-labelledby="view-title">
+        <section class="workflow-section" aria-labelledby="workflow-title">
+          <div class="workflow-heading">
+            <div><span class="section-kicker">本次选课</span><h2 id="workflow-title">按顺序完成准备</h2></div>
+            <span class="workflow-progress-label" id="workflow-progress-label">0 / 4 已就绪</span>
+          </div>
+          <div class="workflow-track" role="group" aria-label="选课流程">
+            <button class="workflow-step" type="button" data-flow-step="login"><span class="step-index"><i data-lucide="key-round"></i></span><span class="step-copy"><small>01</small><strong>登录</strong><em id="flow-login-state">待完成</em></span><i class="step-arrow" data-lucide="chevron-right"></i></button>
+            <button class="workflow-step" type="button" data-flow-step="courses"><span class="step-index"><i data-lucide="book-open-check"></i></span><span class="step-copy"><small>02</small><strong>选课</strong><em id="flow-courses-state">待完成</em></span><i class="step-arrow" data-lucide="chevron-right"></i></button>
+            <button class="workflow-step" type="button" data-flow-step="check"><span class="step-index"><i data-lucide="shield-check"></i></span><span class="step-copy"><small>03</small><strong>自检</strong><em id="flow-check-state">待完成</em></span><i class="step-arrow" data-lucide="chevron-right"></i></button>
+            <button class="workflow-step" type="button" data-flow-step="run"><span class="step-index"><i data-lucide="clock-3"></i></span><span class="step-copy"><small>04</small><strong>运行</strong><em id="flow-run-state">待启动</em></span><i class="step-arrow" data-lucide="chevron-right"></i></button>
+            <button class="workflow-step" type="button" data-flow-step="status"><span class="step-index"><i data-lucide="radio-tower"></i></span><span class="step-copy"><small>05</small><strong>状态</strong><em id="flow-status-state">暂无任务</em></span></button>
+          </div>
+          <div class="next-action-panel" id="next-action-panel">
+            <span class="next-action-icon" id="next-action-icon"><i data-lucide="key-round"></i></span>
+            <div class="next-action-copy"><span id="next-action-kicker">下一步 · 登录</span><h3 id="next-action-title">连接复旦选课系统</h3><p id="next-action-detail">保存当前浏览器的选课登录态。</p></div>
+            <button class="button primary next-action-button" id="next-action-button" type="button"><span id="next-action-label">开始登录</span><i data-lucide="arrow-right"></i></button>
+          </div>
+        </section>
+
+        <div class="readiness-strip" aria-label="当前准备状态">
+          <div class="readiness-item"><span>登录态</span><strong id="summary-cookie">待登录</strong><small id="summary-cookie-note">尚未保存</small></div>
+          <div class="readiness-item"><span>启用课程</span><strong id="summary-courses">0 门</strong><small id="summary-courses-note">尚未选择</small></div>
+          <div class="readiness-item"><span>计划开始</span><strong id="summary-start">--</strong><small id="summary-countdown">等待配置</small></div>
+          <div class="readiness-item"><span>提交节奏</span><strong>1 秒窗口</strong><small>最多 10 门</small></div>
+        </div>
+        <div class="notice" id="config-notice" hidden><i data-lucide="circle-alert"></i><span id="config-notice-text"></span><button class="text-button" type="button" data-view-link="config">检查设置</button></div>
+
+        <section class="section-block queue-section">
+          <div class="section-heading">
+            <div><h2>抢课队列</h2><p>启用的班次会在每轮的 1 秒窗口内提交。</p></div>
+            <div class="button-row"><button class="button secondary" id="dashboard-add-course" type="button"><i data-lucide="plus"></i><span>选择课程</span></button><button class="icon-button bordered" type="button" data-view-link="config" title="编辑队列" aria-label="编辑队列"><i data-lucide="settings-2"></i></button></div>
+          </div>
+          <div class="queue-table-wrap">
+            <table class="queue-table"><thead><tr><th>顺序</th><th>课程</th><th>班级代码</th><th>类别</th><th>状态</th></tr></thead><tbody id="queue-body"></tbody></table>
+            <div class="empty-state" id="queue-empty"><i data-lucide="book-plus"></i><strong>还没有选择课程</strong><button class="text-button" type="button" id="empty-add-course">打开课程目录</button></div>
+          </div>
+        </section>
+        <section class="activity-preview" id="activity-preview"><div class="activity-mark"><i data-lucide="activity"></i></div><div><span>最近活动</span><strong id="activity-title">尚未运行任务</strong><small id="activity-meta">自检和抢课过程会记录在这里</small></div><button class="text-button" type="button" data-view-link="logs">查看记录</button></section>
+      </section>
+
+      <section class="view" id="view-config" aria-labelledby="view-title">
+        <form id="config-form">
+          <section class="section-block first-block">
+            <div class="section-heading sticky-heading"><div><span class="section-kicker">步骤 04</span><h2>运行计划</h2><p id="config-file-state">读取配置中</p></div><div class="button-row"><button class="button secondary" id="next-window" type="button"><i data-lucide="calendar-clock"></i><span>下一场</span></button><button class="button primary" id="save-config" type="submit"><i data-lucide="save"></i><span>保存</span></button></div></div>
+            <div class="field-grid two-columns"><label class="field"><span>开抢时间</span><input id="start-time" type="datetime-local" step="1" required></label><label class="field"><span>截止时间</span><input id="end-time" type="datetime-local" step="1" required></label></div>
+          </section>
+          <section class="section-block">
+            <div class="section-heading"><div><span class="section-kicker">步骤 02</span><h2>已选课程</h2><p>使用行末箭头调整提交顺序。</p></div><button class="button secondary" id="add-course" type="button"><i data-lucide="plus"></i><span>选择课程</span></button></div>
+            <div class="course-editor" id="course-editor"></div>
+            <div class="empty-state editor-empty" id="editor-empty"><i data-lucide="list-plus"></i><strong>队列为空</strong><button class="text-button" type="button" id="config-empty-add-course">选择课程</button></div>
+          </section>
+          <details class="advanced-panel"><summary><span><i data-lucide="sliders-horizontal"></i>高级设置</span><i data-lucide="chevron-down" class="summary-chevron"></i></summary><div class="advanced-content"><div class="field-grid three-columns">
+            <label class="field"><span>Cookie 来源</span><select id="cookie-source"><option value="auto">自动读取浏览器</option><option value="browser">仅浏览器</option><option value="file">本地登录态</option></select></label>
+            <label class="field"><span>登录浏览器</span><select id="browser-select"><option value="edge">Edge</option><option value="chrome">Chrome</option></select></label>
+            <label class="field"><span>回合间隔（秒）</span><input id="request-interval" type="number" min="0.2" max="60" step="0.1"></label>
+            <label class="field"><span>结果轮询间隔（秒）</span><input id="poll-interval" type="number" min="0.2" max="60" step="0.1"></label>
+            <label class="field"><span>最大轮询次数</span><input id="poll-max" type="number" min="1" max="300" step="1"></label>
+            <label class="field"><span>Cookie 刷新（秒）</span><input id="cookie-refresh" type="number" min="30" max="3600" step="1"></label>
+            <label class="field"><span>HTTP 超时（秒）</span><input id="http-timeout" type="number" min="2" max="120" step="1"></label>
+            <label class="field"><span>提交模式</span><input value="最多 10 门 / 1 秒窗口" data-static disabled></label>
+          </div></div></details>
+        </form>
+      </section>
+
+      <section class="view log-view" id="view-logs" aria-labelledby="view-title">
+        <div class="log-toolbar"><div><h2 id="log-title">活动记录</h2><p id="log-meta">尚未运行任务</p></div><div class="button-row"><button class="button secondary" id="clear-log" type="button"><i data-lucide="eraser"></i><span>清空视图</span></button><button class="button danger-quiet" id="log-stop-task" type="button" disabled><i data-lucide="square"></i><span>停止</span></button></div></div>
+        <div class="terminal-shell"><div class="terminal-topbar"><span>实时输出</span><span class="terminal-state" id="terminal-state">等待任务</span></div><pre id="terminal-output" tabindex="0" aria-live="polite">等待任务启动…</pre><form class="terminal-input" id="terminal-input-form"><span aria-hidden="true">›</span><input id="terminal-input" autocomplete="off" placeholder="任务等待输入时可在这里发送" disabled><button class="icon-button" type="submit" title="发送输入" aria-label="发送输入" disabled><i data-lucide="send"></i></button></form></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="confirm-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-message" class="confirm-dialog floating-dialog"><form method="dialog"><div class="dialog-icon"><i data-lucide="triangle-alert"></i></div><h2 id="dialog-title">确认操作</h2><p id="dialog-message"></p><div class="dialog-actions"><button class="button secondary" value="cancel">取消</button><button class="button warning" id="dialog-confirm" value="confirm">确认</button></div></form></dialog>
+
+  <dialog id="cookie-dialog" aria-labelledby="cookie-dialog-title" class="cookie-dialog floating-dialog">
+    <form id="cookie-import-form">
+      <div class="dialog-heading-row"><div><span class="dialog-kicker">步骤 01 / 登录</span><h2 id="cookie-dialog-title">连接复旦选课系统</h2><p>登录态只保存在这台电脑。</p></div><button class="icon-button" id="close-cookie-dialog" type="button" aria-label="关闭"><i data-lucide="x"></i></button></div>
+      <div class="login-steps"><div class="login-step"><span>1</span><div><strong>打开选课系统</strong><p>完成统一身份认证并进入选课页面。</p></div><button class="button secondary" id="open-login-page" type="button"><i data-lucide="external-link"></i><span>打开系统</span></button></div><div class="login-step"><span>2</span><div><strong>复制登录请求</strong><p>在浏览器网络面板中复制选课页面请求为 cURL。</p></div></div></div>
+      <details class="login-help"><summary>如何复制登录请求？</summary><ol><li>在 Chrome 或 Edge 登录选课系统，进入选课页面。</li><li>按 <span id="devtools-shortcut">⌥⌘I（Mac）或 F12（Windows）</span> 打开开发者工具，选择“网络 / Network”，再刷新选课页面。</li><li>找到选课页面的请求（域名 yjsxk.fudan.edu.cn），右键选择“复制 → 复制为 cURL（bash）”。</li><li>回到这里粘贴，下次登录态仍有效时可直接选课。</li></ol></details>
+      <label class="cookie-field" for="cookie-input"><span>粘贴 Cookie 请求头或 cURL</span><span class="cookie-input-wrap"><textarea id="cookie-input" class="is-masked" rows="5" autocomplete="off" spellcheck="false" placeholder="Cookie: ..." required></textarea><button class="icon-button" id="toggle-cookie" type="button" aria-label="显示内容" title="显示内容"><i data-lucide="eye"></i></button></span></label>
+      <p class="privacy-note"><i data-lucide="lock-keyhole"></i>本机验证后仅保存 Cookie 字段。</p><p class="field-error" id="cookie-error" hidden></p>
+      <div class="dialog-actions"><button class="button secondary" id="cancel-cookie-import" type="button">稍后</button><button class="button primary" id="save-cookie" type="submit"><span>验证并继续选课</span><i data-lucide="arrow-right"></i></button></div>
+    </form>
+  </dialog>
+
+  <dialog id="catalog-dialog" aria-labelledby="catalog-dialog-title" class="catalog-dialog floating-dialog">
+    <div class="catalog-shell">
+      <div class="dialog-heading-row catalog-heading"><div><span class="dialog-kicker">步骤 02 / 选课</span><h2 id="catalog-dialog-title">选择教学班</h2><p id="catalog-meta">正在读取课程列表</p></div><div class="button-row"><button class="icon-button" id="refresh-catalog" type="button" aria-label="刷新课程" title="刷新课程"><i data-lucide="refresh-cw"></i></button><button class="icon-button" id="close-catalog" type="button" aria-label="关闭"><i data-lucide="x"></i></button></div></div>
+      <div class="catalog-loading" id="catalog-loading"><i data-lucide="loader-circle"></i><span>正在验证登录态并查询课程</span></div>
+      <div class="catalog-error" id="catalog-error" hidden><i data-lucide="circle-alert"></i><strong>课程列表读取失败</strong><p id="catalog-error-text"></p><button class="button secondary" type="button" data-catalog-login><i data-lucide="log-in"></i><span>重新登录</span></button></div>
+      <div id="catalog-content" hidden><div class="catalog-tabs" id="catalog-tabs" role="group" aria-label="课程类别"></div><div class="catalog-toolbar">
+        <label class="catalog-search"><i data-lucide="search"></i><input id="catalog-search" type="search" aria-label="搜索课程、代码或教师" placeholder="搜索课程、代码或教师" autocomplete="off"></label>
+        <label class="catalog-filter"><span>开课院系</span><select id="catalog-department"><option value="">全部院系</option></select></label><label class="catalog-filter"><span>校区</span><select id="catalog-campus"><option value="">全部校区</option></select></label><label class="catalog-filter"><span>时间冲突</span><select id="catalog-conflict"><option value="">全部</option><option value="no">不冲突</option><option value="yes">有冲突</option></select></label><label class="catalog-filter"><span>课程容量</span><select id="catalog-capacity"><option value="">全部</option><option value="available">有余量</option><option value="full">已满</option></select></label>
+      </div><div class="catalog-list" id="catalog-list"></div><div class="empty-state catalog-empty" id="catalog-empty" hidden><i data-lucide="search-x"></i><strong>没有匹配的课程</strong></div></div>
+      <div class="catalog-footer"><span id="catalog-selection">尚未加入课程</span><button class="button primary" id="finish-catalog" type="button"><span>保存并开始自检</span><i data-lucide="arrow-right"></i></button></div>
+    </div>
+  </dialog>
+
+  <dialog id="workflow-dialog" aria-labelledby="workflow-dialog-title" aria-describedby="workflow-dialog-subtitle" class="workflow-dialog floating-dialog">
+    <div class="workflow-dialog-shell">
+      <div class="dialog-heading-row workflow-dialog-heading"><div><span class="dialog-kicker" id="workflow-dialog-kicker">步骤 03 / 自检</span><h2 id="workflow-dialog-title">运行前自检</h2><p id="workflow-dialog-subtitle">确认登录态、课程权限和运行配置。</p></div><button class="icon-button" id="close-workflow-dialog" type="button" aria-label="关闭"><i data-lucide="x"></i></button></div>
+      <section class="workflow-panel" data-workflow-panel="check">
+        <div class="check-list"><div class="check-row" id="check-login-row"><span class="check-icon"><i data-lucide="key-round"></i></span><div><strong>登录态</strong><small id="check-login-text">等待登录</small></div><em id="check-login-badge">待完成</em></div><div class="check-row" id="check-courses-row"><span class="check-icon"><i data-lucide="book-open-check"></i></span><div><strong>课程队列</strong><small id="check-courses-text">尚未选择课程</small></div><em id="check-courses-badge">待完成</em></div><div class="check-row" id="check-system-row"><span class="check-icon"><i data-lucide="server-cog"></i></span><div><strong>系统连接</strong><small id="check-system-text">尚未验证</small></div><em id="check-system-badge">待自检</em></div></div>
+        <div class="inline-terminal" id="check-terminal" hidden><div class="inline-terminal-head"><span>自检输出</span><span id="check-terminal-state">运行中</span></div><pre id="workflow-check-output" aria-live="polite"></pre></div><p class="field-error" id="check-error" hidden></p>
+        <div class="dialog-actions split-actions"><button class="button secondary" id="check-back" type="button"><i data-lucide="arrow-left"></i><span>返回选课</span></button><button class="button primary" id="check-primary" type="button"><i data-lucide="shield-check"></i><span>开始自检</span></button></div>
+      </section>
+      <section class="workflow-panel" data-workflow-panel="run" hidden>
+        <div class="mode-switch" role="radiogroup" aria-label="运行方式"><label><input type="radio" name="run-mode" value="scheduled" checked><span><i data-lucide="clock-3"></i><strong>按时运行</strong><small>等待计划时间</small></span></label><label><input type="radio" name="run-mode" value="now"><span><i data-lucide="zap"></i><strong>立即运行</strong><small>跳过等待</small></span></label></div>
+        <div class="field-grid two-columns run-time-fields"><label class="field"><span>开抢时间</span><input id="run-start-time" type="datetime-local" step="1" required></label><label class="field"><span>截止时间</span><input id="run-end-time" type="datetime-local" step="1" required></label></div>
+        <div class="run-summary"><div><span>启用课程</span><strong id="run-course-count">0 门</strong></div><div><span>每轮提交</span><strong id="run-burst-summary">1 秒窗口内发起</strong></div><div><span>满员处理</span><strong>持续到截止</strong></div></div>
+        <div class="run-notice" id="run-notice"><i data-lucide="triangle-alert"></i><p id="run-notice-text">启动后将向复旦选课系统提交真实请求。</p></div>
+        <div class="dialog-actions split-actions"><button class="button secondary" id="run-back" type="button"><i data-lucide="arrow-left"></i><span>返回自检</span></button><button class="button warning" id="start-run" type="button"><i data-lucide="play"></i><span>确认启动</span></button></div>
+      </section>
+      <section class="workflow-panel" data-workflow-panel="monitor" hidden>
+        <div class="monitor-status" id="monitor-status" data-state="idle"><span class="monitor-icon"><i data-lucide="radio-tower"></i></span><div><span id="monitor-kicker">任务状态</span><strong id="monitor-title">等待任务</strong><small id="monitor-meta">尚未启动</small></div></div>
+        <div class="inline-terminal monitor-terminal"><div class="inline-terminal-head"><span>实时输出</span><span id="monitor-terminal-state">等待任务</span></div><pre id="workflow-monitor-output" aria-live="polite">等待任务启动…</pre></div>
+        <div class="dialog-actions split-actions"><button class="button secondary" id="open-full-log" type="button"><i data-lucide="terminal-square"></i><span>完整记录</span></button><button class="button danger-quiet" id="monitor-stop" type="button" disabled><i data-lucide="square"></i><span>停止任务</span></button><button class="button primary" id="monitor-close" type="button" hidden>完成</button></div>
+      </section>
+    </div>
+  </dialog>
+  <dialog id="app-dialog" class="floating-dialog cookie-dialog" aria-labelledby="app-dialog-title"><div class="app-settings-shell">
+    <div class="dialog-heading-row"><div><span class="dialog-kicker">本机应用</span><h2 id="app-dialog-title">应用与数据</h2><p id="app-version"></p></div><button class="icon-button" id="close-app-dialog" type="button" aria-label="关闭"><i data-lucide="x"></i></button></div>
+    <div class="app-data-card"><strong>数据保存在本机</strong><p>更新应用不会清除登录态与课程配置。</p><code id="app-data-path"></code><button class="button secondary" id="open-data-folder" type="button"><i data-lucide="folder-open"></i><span>打开数据文件夹</span></button></div>
+    <p class="app-lifecycle-note" id="app-lifecycle-note"></p><p class="app-lifecycle-note">运行任务时会阻止电脑自动空闲睡眠。合盖、手动睡眠、关机或断网仍会影响运行。</p>
+    <div class="dialog-actions"><button class="button danger-quiet" id="quit-app" type="button"><i data-lucide="power"></i><span>退出应用</span></button></div>
+  </div></dialog>
+  <div class="toast-region" id="toast-region" aria-live="polite"></div>
+</body>
+</html>
