@@ -1,5 +1,8 @@
 param([switch]$UseCurrentPython)
 $ErrorActionPreference = "Stop"
+# Keep Chinese test and build output readable on non-Chinese Windows runners.
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $ProjectRoot
 if ($UseCurrentPython) {
